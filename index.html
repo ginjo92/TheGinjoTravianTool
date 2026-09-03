@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ginjo Travian Tool</title>
+    <link rel="icon" type="image/png" href="assets/ginjo-travian-logo.png" />
+    <link rel="stylesheet" href="styles.css?v=20260709-icons" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img class="brand-logo" src="assets/ginjo-travian-logo.png" alt="Ginjo Travian Tool logo" />
+          <div>
+            <h1>Ginjo Travian Tool</h1>
+            <p>Calculators and field notes for Legends.</p>
+          </div>
+        </div>
+
+        <section class="profile-card" id="profileCard">
+          <div class="profile-tools">
+            <button id="newAvatarButton" type="button" aria-label="Add avatar" title="Add avatar">+</button>
+            <button id="editAvatarButton" type="button" aria-label="Edit avatar" title="Edit avatar">✎</button>
+            <button id="avatarDropdownButton" type="button" aria-label="Switch avatar" title="Switch avatar">⌄</button>
+            <select id="avatarSelect" aria-label="Switch avatar"></select>
+          </div>
+          <div class="profile-head">
+            <span class="avatar-medallion" id="avatarInitial">?</span>
+            <div>
+              <h2 id="avatarName">No avatar</h2>
+              <p id="avatarMeta">Create an avatar to begin.</p>
+            </div>
+          </div>
+          <dl class="profile-facts">
+            <div><dt>Server</dt><dd id="profileServer">-</dd></div>
+          </dl>
+          <span id="profileVillageCount" hidden>0</span>
+        </section>
+
+        <section class="sidebar-update">
+          <button id="openTravianPasteDialogButton" class="primary-button" type="button">Update villages and troops</button>
+          <small id="travianPagePasteStatus" class="paste-status" hidden></small>
+          <details class="sidebar-danger-zone">
+            <summary>Data tools</summary>
+            <button id="resetVillagesButton" class="danger-button" type="button">Reset villages</button>
+          </details>
+        </section>
+
+        <section class="sidebar-villages" aria-labelledby="sidebarVillageTitle">
+          <div class="sidebar-section-head">
+            <h2 id="sidebarVillageTitle">Villages</h2>
+            <span id="sidebarVillageCount">0</span>
+          </div>
+          <div id="sidebarVillageOverview" class="sidebar-village-list"></div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <nav class="tabs top-tabs" aria-label="Tool sections">
+          <button class="tab is-active" data-tab="dashboard" type="button">Dashboard</button>
+          <button class="tab" data-tab="planning" type="button">Planning</button>
+          <button class="tab" data-tab="routes" type="button">Trading Routes</button>
+          <button class="tab" data-tab="calculators" type="button">Calculators</button>
+          <button class="tab" data-tab="knowledge" type="button">Knowledge</button>
+        </nav>
+
+        <section class="topbar">
+          <div>
+            <p class="eyebrow">Travian Legends workspace</p>
+            <h2 id="pageTitle">Dashboard</h2>
+          </div>
+          <div class="summary-strip" id="summaryStrip"></div>
+        </section>
+
+        <section class="panel is-visible" id="dashboardPanel" aria-labelledby="pageTitle">
+          <div class="village-list" id="villageList"></div>
+        </section>
+
+        <section class="panel" id="planningPanel" aria-labelledby="pageTitle">
+          <div class="dashboard-subtabs" aria-label="Planning sections">
+            <button class="is-active" data-planning-view="troops" type="button">Troops</button>
+            <button data-planning-view="buildings" type="button">Buildings</button>
+          </div>
+
+          <div class="planning-view is-visible" id="planningTroopsView">
+            <div class="section-tools">
+              <div class="segmented" id="roleFilters" aria-label="Troop role filters"></div>
+              <div class="planning-search-tools">
+                <label class="compact-field">
+                  <span>Tribe</span>
+                  <select id="troopTribeFilter"></select>
+                </label>
+                <label class="search-field">
+                  <span>Search troop</span>
+                  <input id="troopSearchInput" type="search" placeholder="Search troop" />
+                </label>
+              </div>
+              <label class="compact-field">
+                <span>Plan quantity</span>
+                <input id="quantityInput" type="number" min="1" step="1" value="100" />
+              </label>
+            </div>
+            <div class="resource-bank" aria-label="Available resources">
+              <label>
+                <span id="availableWoodIcon"></span>
+                <input id="availableWoodInput" type="number" min="0" step="1" placeholder="Wood" />
+              </label>
+              <label>
+                <span id="availableClayIcon"></span>
+                <input id="availableClayInput" type="number" min="0" step="1" placeholder="Clay" />
+              </label>
+              <label>
+                <span id="availableIronIcon"></span>
+                <input id="availableIronInput" type="number" min="0" step="1" placeholder="Iron" />
+              </label>
+              <label>
+                <span id="availableCropIcon"></span>
+                <input id="availableCropInput" type="number" min="0" step="1" placeholder="Crop" />
+              </label>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Unit</th>
+                    <th>Role</th>
+                    <th>Cost</th>
+                    <th>
+                      <label class="table-select-field">
+                        <span>Smithy</span>
+                        <select id="smithyLevelInput"></select>
+                      </label>
+                    </th>
+                    <th>Attack</th>
+                    <th>Def Inf</th>
+                    <th>Def Cav</th>
+                    <th>Speed</th>
+                    <th>Carry</th>
+                    <th>Upkeep</th>
+                    <th>Training</th>
+                    <th>Efficiency</th>
+                  </tr>
+                </thead>
+                <tbody id="troopTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="planning-view" id="planningBuildingsView">
+            <div class="section-tools">
+              <div class="segmented" id="buildingCategoryFilters" aria-label="Building category filters"></div>
+              <label class="search-field">
+                <span>Search building</span>
+                <input id="buildingSearchInput" type="search" placeholder="Search building" />
+              </label>
+              <div class="range-fields">
+                <label class="compact-field">
+                  <span>From</span>
+                  <input id="fromLevelInput" type="number" min="0" max="19" value="0" />
+                </label>
+                <label class="compact-field">
+                  <span>To</span>
+                  <input id="toLevelInput" type="number" min="1" max="20" value="10" />
+                </label>
+              </div>
+            </div>
+            <div id="buildingGrid" class="building-grid"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="calculatorsPanel" aria-labelledby="pageTitle">
+          <div class="calculator-grid">
+            <article class="tool-card">
+              <h3>Troop Training Planner</h3>
+              <div class="calculator-fields">
+                <label class="field">
+                  <span>Unit</span>
+                  <select id="plannerUnit"></select>
+                </label>
+                <label class="field">
+                  <span>Quantity</span>
+                  <input id="plannerQuantity" type="number" min="1" value="1000" />
+                </label>
+                <label class="field">
+                  <span>Training building level</span>
+                  <input id="plannerBuildingLevel" type="number" min="1" max="20" value="20" />
+                </label>
+              </div>
+              <div id="trainingResult" class="result-box"></div>
+            </article>
+
+            <article class="tool-card">
+              <h3>Travel Time</h3>
+              <div class="coordinate-grid">
+                <label class="field">
+                  <span>From X</span>
+                  <input id="fromX" type="number" value="0" />
+                </label>
+                <label class="field">
+                  <span>From Y</span>
+                  <input id="fromY" type="number" value="0" />
+                </label>
+                <label class="field">
+                  <span>To X</span>
+                  <input id="toX" type="number" value="25" />
+                </label>
+                <label class="field">
+                  <span>To Y</span>
+                  <input id="toY" type="number" value="-18" />
+                </label>
+              </div>
+              <label class="field">
+                <span>Slowest unit</span>
+                <select id="travelUnit"></select>
+              </label>
+              <div id="travelResult" class="result-box"></div>
+            </article>
+
+            <article class="tool-card">
+              <h3>Build Cost Planner</h3>
+              <div class="calculator-fields">
+                <label class="field">
+                  <span>Building</span>
+                  <select id="plannerBuilding"></select>
+                </label>
+                <label class="field">
+                  <span>From level</span>
+                  <input id="plannerFromLevel" type="number" min="0" max="19" value="0" />
+                </label>
+                <label class="field">
+                  <span>To level</span>
+                  <input id="plannerToLevel" type="number" min="1" max="20" value="10" />
+                </label>
+              </div>
+              <div id="buildingResult" class="result-box"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="routesPanel" aria-labelledby="pageTitle">
+          <div class="routes-layout">
+            <article class="tool-card route-editor-card">
+              <h3>Create trade route</h3>
+              <form id="routeForm" class="route-form travian-route-form">
+                <label class="field target-field">
+                  <span>Target village</span>
+                  <select id="routeToVillage"></select>
+                </label>
+                <small id="routeTargetStatus" class="route-warning">Please select a target.</small>
+
+                <div class="route-radio-row" aria-label="Target filter">
+                  <label><input name="routeTargetScope" type="radio" value="all" checked /> <span>all</span></label>
+                  <label><input name="routeTargetScope" type="radio" value="mine" /> <span>only mine</span></label>
+                  <label><input name="routeTargetScope" type="radio" value="others" /> <span>others</span></label>
+                </div>
+
+                <div class="route-field-grid route-context-grid">
+                  <label class="field">
+                    <span>Sending village</span>
+                    <select id="routeFromVillage"></select>
+                  </label>
+                  <label class="field">
+                    <span>Hub</span>
+                    <select id="routeHubSelect"></select>
+                  </label>
+                </div>
+
+                <p id="routeMerchantInfo" class="route-merchant-info">Each of your merchants can carry 0 resources.</p>
+
+                <div class="route-resource-grid">
+                  <label class="field">
+                    <span><img class="field-icon" src="assets/resources/wood.png" alt="" aria-hidden="true" />Wood</span>
+                    <input id="routeWoodInput" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label class="field">
+                    <span><img class="field-icon" src="assets/resources/clay.png" alt="" aria-hidden="true" />Clay</span>
+                    <input id="routeClayInput" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label class="field">
+                    <span><img class="field-icon" src="assets/resources/iron.png" alt="" aria-hidden="true" />Iron</span>
+                    <input id="routeIronInput" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label class="field">
+                    <span><img class="field-icon" src="assets/resources/crop.png" alt="" aria-hidden="true" />Crop</span>
+                    <input id="routeCropInput" type="number" min="0" step="1" value="0" />
+                  </label>
+                </div>
+
+                <div class="route-total-row">
+                  <span id="routeTotalStatus">Total: 0</span>
+                  <span id="routeMerchantStatus">Merchants: 0 / 20</span>
+                </div>
+                <small id="routeResourceWarning" class="route-warning">No resources selected - add resources to trade route.</small>
+
+                <div class="route-timing-row">
+                  <div class="route-radio-row" aria-label="Route timing">
+                    <label><input name="routeTimingChoice" type="radio" value="send" checked /> <span>Send</span></label>
+                    <label><input name="routeTimingChoice" type="radio" value="delivery" /> <span>Deliver</span></label>
+                  </div>
+                  <input id="routeTimeInput" class="route-time-input" type="time" />
+                  <span id="routeTravelPreview" class="route-travel-preview">Travel time: -</span>
+                </div>
+
+                <div class="deliveries-row">
+                  <span>Deliveries</span>
+                  <label><input name="routeDeliveryCount" type="radio" value="1" checked /> <strong>1x</strong></label>
+                  <label><input name="routeDeliveryCount" type="radio" value="2" /> <strong>2x</strong></label>
+                  <label><input name="routeDeliveryCount" type="radio" value="3" /> <strong>3x</strong></label>
+                </div>
+
+                <label class="field repeat-field">
+                  <span>Repeat every</span>
+                  <select id="routeRepeatEvery">
+                    <option value="24">24 hour(s)</option>
+                    <option value="12">12 hour(s)</option>
+                    <option value="8">8 hour(s)</option>
+                    <option value="6">6 hour(s)</option>
+                    <option value="4">4 hour(s)</option>
+                    <option value="3">3 hour(s)</option>
+                    <option value="2">2 hour(s)</option>
+                    <option value="1">1 hour(s)</option>
+                    <option value="once">Send only once</option>
+                  </select>
+                </label>
+
+                <input id="routeTripsInput" type="hidden" value="1" />
+                <input id="routeLabelInput" type="hidden" />
+
+                <div class="route-form-actions">
+                  <button class="primary-button" type="submit">Create trade route</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="tool-card route-summary-card">
+              <h3>Trading hubs</h3>
+              <form id="hubForm" class="hub-form">
+                <label class="field">
+                  <span>Village</span>
+                  <select id="hubVillageSelect"></select>
+                </label>
+                <label class="field">
+                  <span>Name</span>
+                  <input id="hubNameInput" type="text" placeholder="Main trade hub" />
+                </label>
+                <button class="primary-button" type="submit">Create hub</button>
+              </form>
+              <div id="hubList" class="hub-list"></div>
+              <div id="hubFlowDetails" class="hub-flow-details"></div>
+              <h3>Merchant plan</h3>
+              <div id="routeSummary" class="route-summary"></div>
+            </article>
+          </div>
+
+          <div class="route-list-head">
+            <h3>Routes</h3>
+            <span id="routeCount">0</span>
+          </div>
+          <div id="routeList" class="route-list"></div>
+        </section>
+
+        <section class="panel" id="knowledgePanel" aria-labelledby="pageTitle">
+          <div id="tribeCards" class="tribe-grid"></div>
+          <div class="notes-panel">
+            <h3>Source Notes</h3>
+            <ul id="sourceNotes"></ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="avatarDialog" class="avatar-dialog">
+      <form id="avatarForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Avatar setup</p>
+            <h2 id="avatarDialogTitle">Register avatar</h2>
+          </div>
+          <button id="closeAvatarDialog" class="icon-button" type="button" aria-label="Close">x</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label class="field">
+            <span>Name</span>
+            <input id="avatarNameInput" type="text" required placeholder="Your avatar name" />
+          </label>
+
+          <select id="serverPresetInput" hidden></select>
+
+          <label class="field">
+            <span>Travian server link</span>
+            <div class="lookup-field">
+              <input id="serverUrlInput" type="url" required placeholder="https://ts30.x3.international.travian.com/" />
+              <button id="serverLookupButton" type="button">Look up</button>
+            </div>
+            <small id="serverLookupStatus">Paste a Travian gameworld link.</small>
+          </label>
+
+          <label class="field">
+            <span>Server name</span>
+            <input id="serverNameInput" type="text" required readonly placeholder="International 30" />
+          </label>
+
+          <label class="field server-rule-field">
+            <span>Speed</span>
+            <select id="serverSpeedInput">
+              <option value="1">x1</option>
+              <option value="2">x2</option>
+              <option value="3">x3</option>
+              <option value="5">x5</option>
+              <option value="10">x10</option>
+            </select>
+          </label>
+
+          <label class="field server-rule-field">
+            <span>Version</span>
+            <select id="serverVersionInput">
+              <option value="regular">Regular / WW</option>
+              <option value="five-tribe">5 tribe</option>
+              <option value="special">Special / Community Week</option>
+              <option value="northern">Northern Legends</option>
+            </select>
+          </label>
+
+          <label class="field server-rule-field">
+            <span>Tribes available</span>
+            <select id="serverTribeCountInput">
+              <option value="3">3 tribes</option>
+              <option value="5">5 tribes</option>
+              <option value="6">6 tribes</option>
+              <option value="7">All tool tribes</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Tribe</span>
+            <select id="avatarTribeInput"></select>
+          </label>
+        </div>
+
+        <label class="check-field server-rule-field">
+          <input id="tribeUnlockedInput" type="checkbox" />
+          <span>Allow changing tribe later for this avatar</span>
+        </label>
+
+        <p class="dialog-note">Name and server are locked after creation. Create a new avatar for another server.</p>
+        <div class="dialog-actions">
+          <button id="deleteAvatarButton" class="danger-button" type="button">Delete avatar</button>
+          <button class="primary-button" type="submit">Save avatar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="travianPasteDialog" class="avatar-dialog paste-dialog">
+      <form id="travianPasteForm" method="dialog">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Travian paste</p>
+            <h2>Update villages and troops</h2>
+          </div>
+          <button id="closeTravianPasteDialog" class="icon-button" type="button" aria-label="Close">x</button>
+        </div>
+        <small id="travianPasteDialogStatus" class="paste-status dialog-paste-status"></small>
+
+        <div class="field paste-source paste-image-source">
+          <span>Screenshots</span>
+          <label class="upload-control">
+            <span>Upload screenshots</span>
+            <input id="travianImageInput" type="file" accept="image/*" multiple />
+          </label>
+          <small id="travianImageStatus" class="upload-status"></small>
+        </div>
+
+        <div class="paste-dialog-grid">
+          <div class="field paste-source" id="travianTroopsPasteSource" data-import-source="troops">
+            <span>Troops overview</span>
+            <textarea id="travianTroopsPasteInput" rows="14" placeholder="Paste the Troops in villages page"></textarea>
+          </div>
+
+          <div class="field paste-source" id="travianProductionPasteSource" data-import-source="production">
+            <span>Resource production overview</span>
+            <textarea id="travianProductionPasteInput" rows="14" placeholder="Paste the Resources production page"></textarea>
+          </div>
+
+          <div class="field paste-source" id="travianVillageOverviewPasteSource" data-import-source="villages">
+            <span>Village overview</span>
+            <textarea id="travianVillageOverviewPasteInput" rows="14" placeholder="Paste your profile village overview page"></textarea>
+          </div>
+        </div>
+
+        <div class="dialog-actions">
+          <button id="clearTravianPasteButton" class="ghost-button" type="button">Clear</button>
+          <button id="importTravianPasteButton" class="primary-button" type="button">Update villages and troops</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="data.js?v=20260709-icons"></script>
+    <script src="app.js?v=20260709-icons"></script>
+  </body>
+</html>
